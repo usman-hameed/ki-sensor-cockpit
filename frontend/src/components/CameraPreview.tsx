@@ -9,6 +9,7 @@ export function CameraPreview() {
   const cam = useStore((s) => s.camera);
   const box = useRef<HTMLDivElement>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [turn, setTurn] = useState(camera.turn);
 
   // every camera Windows offers (a phone in USB webcam mode appears here once it is plugged in)
   useEffect(() => {
@@ -33,12 +34,13 @@ export function CameraPreview() {
   const flash = Date.now() - cam.snapAt < 900;
   return (
     <div className="camera-pip">
-      <div className="camera-frame" ref={box}>
+      <div className={`camera-frame turn-${turn}`} ref={box}>
         {flash && <div className="camera-flash" key={cam.snapAt} />}
       </div>
       <div className="camera-bar">
         <span className="camera-dot" />
         <span className="camera-label">{cam.snapPart ? `Part ${cam.snapPart} photographed` : "Live"}</span>
+        <button className="icon-only" title="Turn the picture a quarter (also the photos)" onClick={() => setTurn(camera.rotate())}>⟳</button>
         <button className="icon-only" title="Camera off" onClick={() => void controller.toggleCamera()}><Icon name="close" /></button>
       </div>
       <div className="camera-bar">
