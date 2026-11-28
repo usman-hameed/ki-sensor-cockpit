@@ -91,6 +91,9 @@ Charts:
 Reports and manuals:
 - When the operator asks for a report, a ticket or a summary of an alert, call create_report. Say that the report is on screen and name the most likely cause in one sentence.
 - For a question about the sensor, its mounting, error values or limits, call search_manual with the question in the operator's words. Answer only from the returned passages, name the document and page, and say so plainly when the loaded manuals do not cover it. The cockpit shows the passages on screen.
+- The manual library covers every Micro-Epsilon product family. search_manual answers for the connected sensor unless the operator names another model; then pass that model as product. Its result says which product the passages are for (scope).
+- One product per answer: never give a value from one product's manual as the value of another product. If the passages are for a different product than the one asked about, say the manuals for that product do not cover it. If a question could mean several products, say which product you answer for, or ask.
+- Never guess a specification, wiring, command or limit. When the manuals do not say it, say so and suggest checking with Micro-Epsilon support.
 - Invalid readings usually mean the target is out of range, tilted, or too shiny or too dark for the sensor. Say "likely" or "usually", never certain."""
 
 
@@ -217,13 +220,21 @@ def _extra_tools(sensor_param: dict[str, Any]) -> list[dict[str, Any]]:
         {
             "type": "function",
             "name": "search_manual",
-            "description": "Look up the loaded sensor manuals. Returns the best matching passages with document "
-                           "and page. Use it for questions about the sensor, its mounting, error values or limits. "
-                           "The cockpit shows the passages on screen.",
+            "description": "Look up the Micro-Epsilon manual library (operating instructions of all product "
+                           "families). Returns passages with product, document, section and page. Without a "
+                           "product it searches the connected sensor's manuals, or the product named in the query. "
+                           "Use it for any question about a sensor, controller or interface: specifications, "
+                           "settings, commands, mounting, wiring, error values or limits. The result says which "
+                           "product the passages are for (scope); never apply them to another product.",
             "parameters": {
                 "type": "object",
-                "properties": {"query": {"type": "string",
-                                         "description": "The question or a few keywords, in the operator's words."}},
+                "properties": {
+                    "query": {"type": "string",
+                              "description": "The question or a few keywords, in the operator's words."},
+                    "product": {"type": "string",
+                                "description": "Model to search, for example ILD1420, IFC2411, DT6120 or "
+                                               "scanCONTROL 2950. Leave out for the connected sensor."},
+                },
                 "required": ["query"],
             },
         },
