@@ -561,7 +561,8 @@ def render_passport_html(engine: Engine, sid: str, number: int, embed: bool = Fa
                   if track.empty_um is not None else f"reads {length(ref.center_um)}, ± {length(ref.half_width_um)}")
     words = {"jam": "possible jam", "double_feed": "possible double feed", "unsteady": "never lay still"}
     rows = [("Verdict", "the taught part" if good else "a different part"),
-            ("Height above the plate", length(record.height_um)),
+            ("Height above the plate", length(record.height_um) if record.height_um is not None
+             else "not measured: the empty plate was not taught"),
             ("Top surface (sensor reading)", length(record.position_um)),
             ("Difference to the taught part", length(record.deviation_um, signed=True)),
             ("Taught part", taught),

@@ -8,8 +8,6 @@ and on the phones of everyone in the room.
 
 ![Cockpit](docs/screenshot-cockpit.png)
 
-![Mission mode](docs/screenshot-mission.png)
-
 ![The quality station: every part, its height and verdict](docs/screenshot-charts.png)
 
 ## What it does
@@ -22,10 +20,10 @@ and on the phones of everyone in the room.
 | Quality station | Every part gets a number, its height above the plate, how long it stayed and its verdict. Live counter, yield and parts per minute; the part log downloads for Excel. From the rhythm of the parts it warns of a **possible jam** and a **possible double feed**; from the heights of the good parts it warns of a **height trend** before the parts leave the band. |
 | Charts on request | "Show me a bar chart", "show the part heights", "show a histogram": the cockpit draws the chart and walks you through it, pointing at each finding while it speaks. |
 | Voice copilot | Epsilon (OpenAI Realtime) answers questions about the sensor and the parts. Every number comes from a tool call on the real data; without a key the browser voice and typed commands still work. |
-| Reports | One click or "write a report": what happened, the heights of the last parts, likely causes, next steps, with the manual page. Save as PDF or scan the code to take it on a phone. |
+| Reports | The **Report** tab gives the run report: every part and alert of the run, with a code for the phone. One click or "write a report" on an alert: what happened, the heights of the last parts, likely causes, next steps, with the manual page. Save as PDF or scan the code to take it on a phone. |
 | Manuals | Drop the Micro-Epsilon PDFs into the Manuals sheet; Epsilon answers from them and opens the page. |
 | Phones | The jury scans a code and their phones flash, beep and vibrate on every alert, and list the last parts. |
-| Mission mode | Press **J** for the pitch: the lights go out, the twin glows, the part counter sits next to it. |
+| Camera and part passports | A camera (a phone over USB works) photographs every part while it lies under the sensor. Click a part in the part log for its passport: photo, height, difference to the taught part, alerts, and a code to take it on a phone. |
 | Plug and play | `type: medaqlib` lets Micro-Epsilon's MEDAQLib find any supported sensor on Ethernet, USB or the serial ports. |
 
 ## Quick start (Windows)
@@ -66,17 +64,17 @@ needed. The sensor talks only to the laptop; browsers and phones talk to the coc
    `.\.venv\Scripts\python.exe scripts\sensor_check.py`. It says in plain words what to fix if something is wrong.
 7. In `backend\.env` set `SENSORS_FILE=config/sensors.live.yaml` (and `LIVE_SENSOR_HOST=` / `LIVE_SENSOR_PORT=` only
    if the address or port differ). Restart the cockpit.
-8. The top bar says "Target in measuring range (live data)" and the tile says "Live sensor 20 kHz" with the address.
+8. The top bar says "Target in measuring range (live data)" and the status bar at the bottom says "Live sensor" with the address.
 
 In `config/sensors.live.yaml` set the model from the sensor's label (ILD5500-10, -25, -50, -100 or -200). The model
 decides the limits: 0 to 10 mm for an ILD5500-10, with the extended range from −2.5 to 12.5 mm around it (data sheet
-p. 6). If the cable is pulled, the tile says so and the cockpit reconnects by itself. Every number on the screen comes
+p. 6). If the cable is pulled, the cockpit says so and the cockpit reconnects by itself. Every number on the screen comes
 from the sensor: there is no simulated data behind a live sensor.
 
 ### Plug and play with MEDAQLib (optional)
 
 MEDAQLib is Micro-Epsilon's free driver library for Windows. With it the cockpit searches for a sensor on Ethernet,
-USB and the serial ports and opens the first one it finds; the tile shows the model, the interface, the address and
+USB and the serial ports and opens the first one it finds; the Sensor panel shows the model, the interface, the address and
 the serial number. Install MEDAQLib, then replace the `source:` block in `config/sensors.live.yaml` with the
 commented MEDAQLib block in the same file (it names the 64-bit DLL, `sensor: auto` and an optional fixed address).
 It was written from the MEDAQLib manual and tested with a stand-in for the DLL, not yet with the real sensor: for the
@@ -84,18 +82,18 @@ optoNCDT 5500 the direct Ethernet connection above is the tested way.
 
 ## Part check and quality station
 
-1. With the plate empty, press **Part check** in the sensor tile and then **Teach the empty plate**.
+1. With the plate empty, open the **Part check** tab and press **Teach the empty plate**.
 2. Put one good part under the laser, hold it still and press **Teach this part**. The accepted band is the spread of
    the taught parts plus ±0.10 mm (change it in the panel; **Add another good part** widens it to your real spread).
 3. From now on every part that rests under the sensor for half a second is counted when it leaves: the counter in the
-   tile goes up and the part appears in the part log, on the phones and, in mission mode, next to the twin.
-4. A different part raises **Different part detected** at once. The tile turns red, the twin paints the part red and
+   Part log panel goes up and the part appears in the part log and on the phones.
+4. A different part raises **Different part detected** at once. The cockpit turns red, the 3D model paints the part red and
    every phone flashes.
 5. After three parts the station knows the rhythm. A part that stays far longer than usual (at least 8 s) is a
    **possible jam**; one that follows far sooner than usual is a **possible double feed**. After eight good parts it
    fits a straight line through their heights; when the parts move towards the edge of the band, it says in how many
    parts they will leave it: a **height trend**.
-6. The tile's counter opens the **Quality station** sheet: counts, yield, rhythm, trend, the list of parts, the charts
+6. The **Part log** tab opens the quality station sheet: counts, yield, rhythm, trend, the list of parts, the charts
    (height of every part, bar chart, height spread), **Download for Excel** and **New run**.
 
 The taught part is kept in `backend/data/part_reference.json`, the part log in `backend/data/part_log.jsonl` (both
@@ -128,9 +126,10 @@ and one stays 14 s (a jam). Other scenarios: `quiet`, `parts`, `extended` (the t
 | "explain this chart" | Epsilon walks through it, marking each finding |
 | "write a report" | The report on the last alert |
 | "teach this part" | The part check |
-| **J** | Mission mode on and off |
 | **Q** | The code for the phones |
 | **R** | The report on the last alert |
+| **C** | Camera on and off |
+| **M** | Sound on and off |
 | **Delete** | Remove the front chart |
 | **Escape** | Close a sheet |
 
@@ -182,9 +181,9 @@ npm run build
 
 | Problem | Do this |
 | --- | --- |
-| The tile says "sensor not connected" | Check the cable, the laptop's address (169.254.168.10, mask 255.255.0.0) and that nothing else reads the sensor. The cockpit reconnects by itself. |
+| The cockpit says "sensor not connected" | Check the cable, the laptop's address (169.254.168.10, mask 255.255.0.0) and that nothing else reads the sensor. The cockpit reconnects by itself. |
 | "Connected, but no readings" | In the sensor's web page set the output interface to Ethernet and Server TCP/IP on port 1024. |
-| "Most readings are invalid" | No target, the target is outside the measuring range, or the surface is too dark or shiny. The tile shows the sensor's own status. |
+| "Most readings are invalid" | No target, the target is outside the measuring range, or the surface is too dark or shiny. The cockpit shows the sensor's own status. |
 | Taking a part away raises "Different part" | Teach the empty plate in the part check. |
 | The counter does not count | The station needs both the empty plate and a good part taught. |
 | "Possible jam" while you talk | A part lay under the sensor much longer than the parts before. Take it away, or start a **New run** before the pitch. |
