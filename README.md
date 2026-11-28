@@ -89,8 +89,8 @@ optoNCDT 5500 the direct Ethernet connection above is the tested way.
    Part log panel goes up and the part appears in the part log and on the phones.
 4. A different part raises **Different part detected** at once. The cockpit turns red, the 3D model paints the part red and
    every phone flashes.
-5. After three parts the station knows the rhythm. A part that stays far longer than usual (at least 8 s) is a
-   **possible jam**; one that follows far sooner than usual is a **possible double feed**. After eight good parts it
+5. After three parts the station knows the rhythm. A part that stays longer than 6 s is a
+   **possible jam**; one that comes less than 2 s after the one before is a **possible double feed**. After eight good parts it
    fits a straight line through their heights; when the parts move towards the edge of the band, it says in how many
    parts they will leave it: a **height trend**.
 6. The **Part log** tab opens the quality station sheet: counts, yield, rhythm, trend, the list of parts, the charts

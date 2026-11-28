@@ -38,8 +38,8 @@ The station's alerts:
 | Alert | When |
 | --- | --- |
 | Different part | The part check: a steady reading outside the band of the taught part (±0.10 mm unless changed). |
-| Possible jam | After three parts: a part stays longer than three usual stays, the usual stay plus 5 s and at least 8 s. Once per part, while it is still there. |
-| Possible double feed | After three parts: a part follows the previous one in less than 0.4 of the usual gap (the usual gap at least 0.8 s). |
+| Possible jam | After three parts: a part stays longer than 6 s (and longer than 1.5 usual stays). Once per part, while it is still there. |
+| Possible double feed | After three parts: a part comes less than 2 s after the previous one (and sooner than half the usual gap). |
 | Height trend | After eight good parts: a clear straight line through their heights (R² ≥ 0.6) that reaches the edge of the band within 40 parts. Critical within 10. |
 
 ## 4. Ask Epsilon

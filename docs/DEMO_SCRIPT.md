@@ -24,7 +24,7 @@ passport and says what is going on.
    names the page.
 9. Sound up. Five good parts and two different ones (a taller and a lower one) on the table, within reach.
 10. Do not leave a part under the sensor while you wait: after a few parts the station knows the rhythm and a part
-    that lies there for a long time is a "possible jam". Before the first part it says nothing.
+    that lies there longer than 6 s is a "possible jam". Before the first part it says nothing.
 
 ## 0:00 The problem (30 s)
 
@@ -42,8 +42,8 @@ Press **Q**. "Please scan this with your phones." Wait until the top bar counts 
 ## 0:50 The line runs (60 s)
 
 Press **⇄ 3D model large** (or double-click the small 3D model): the 3D model moves to the middle, the live signal
-to the right. Put good parts under the laser one after the other: put one down, count to two, take it away, the
-next one.
+to the right. Put good parts under the laser one after the other: put one down, count to two, take it away, wait
+about three seconds, the next one. Faster than 2 s between parts is a "possible double feed".
 
 - "We taught it one good part. That is all the setup there is."
 - Each part shows up green in the 3D model, and the counter in the Part log panel goes up the moment it leaves.

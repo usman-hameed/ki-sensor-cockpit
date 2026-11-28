@@ -50,11 +50,11 @@ LOOK_BACK_S = 1.0         # when the station becomes ready it starts this far ba
 MOVED_UM = 150.0          # a steady surface this far from the part's own is another part
 MIN_RHYTHM = 3            # parts before the rhythm is known
 RHYTHM_LAST = 20
-JAM_FACTOR = 3.0          # a jam: a stay longer than this many usual stays ...
-JAM_EXTRA_S = 5.0         # ... and longer than the usual stay plus this ...
-JAM_MIN_S = 8.0           # ... and never below this
-DOUBLE_FEED_SHARE = 0.4   # a double feed: a gap shorter than this share of the usual gap ...
-MIN_GAP_S = 0.8           # ... where the usual gap is at least this long
+JAM_S = 6.0               # a jam: a part that stays longer than this ...
+JAM_FACTOR = 1.5          # ... and longer than this many usual stays (so slow lines are not always "jammed")
+DOUBLE_FEED_GAP_S = 2.0   # a double feed: a part that comes less than this after the one before ...
+DOUBLE_FEED_SHARE = 0.5   # ... and sooner than this share of the usual gap (so fast lines are not always flagged)
+MIN_GAP_S = 0.8           # no double feed check while the usual gap is shorter than this
 TREND_MIN = 8             # good parts before a trend can be judged
 TREND_LAST = 20
 TREND_MIN_R2 = 0.6
@@ -216,7 +216,7 @@ class Station:
         if not rhythm["known"] or rhythm["dwell_s"] is None:
             return None
         usual = rhythm["dwell_s"]
-        return max(JAM_FACTOR * usual, usual + JAM_EXTRA_S, JAM_MIN_S)
+        return max(JAM_S, JAM_FACTOR * usual)
 
     # -- following the parts ----------------------------------------------------------------
 
@@ -339,7 +339,7 @@ class Station:
         if line.last_end is None or not rhythm["known"] or not rhythm["gap_s"] or rhythm["gap_s"] < MIN_GAP_S:
             return []
         gap = start - line.last_end
-        if gap >= DOUBLE_FEED_SHARE * rhythm["gap_s"]:
+        if gap >= min(DOUBLE_FEED_GAP_S, DOUBLE_FEED_SHARE * rhythm["gap_s"]):
             return []
         line.visit.flags.append("double_feed")
         return [self._double_feed_event(sid, line, gap, rhythm["gap_s"], start)]

@@ -141,9 +141,9 @@ def test_a_part_that_stays_far_too_long_is_a_possible_jam(line):
     line.hold(PLATE, 1.0)
     for _ in range(4):
         line.part(PART, 2.0, 1.0)
-    line.hold(PART, 6.0)
-    assert "jam" not in line.kinds()                         # not yet: the limit is at least 8 s
-    line.hold(PART, 6.0)
+    line.hold(PART, 5.5)
+    assert "jam" not in line.kinds()                         # not yet: the limit is 6 s
+    line.hold(PART, 1.0)
     assert line.kinds().count("jam") == 1
     assert "jam" in line.station.active_kinds(line.sid)
     jam = next(e for e in line.events if e.kind == "jam")
@@ -160,16 +160,18 @@ def test_a_part_that_follows_far_too_soon_is_a_possible_double_feed(line):
     line.teach()
     line.hold(PLATE, 2.0)
     for _ in range(4):
-        line.part(PART, 2.0, 2.0)
+        line.part(PART, 2.0, 5.0)
     assert "double_feed" not in line.kinds()
     line.hold(PART, 2.0)
-    line.hold(PLATE, 0.3)
+    line.hold(PLATE, 2.5)                                    # 2.5 s is no double feed ...
+    line.hold(PART, 2.0)
+    line.hold(PLATE, 1.5)                                    # ... 1.5 s is one
     line.hold(PART, 2.0)
     line.hold(PLATE, 2.0)
     assert line.kinds().count("double_feed") == 1
     event = next(e for e in line.events if e.kind == "double_feed")
-    assert event.numbers["gap_s"] == pytest.approx(0.3, abs=0.12)
-    assert event.numbers["usual_gap_s"] == pytest.approx(2.0, abs=0.2)
+    assert event.numbers["gap_s"] == pytest.approx(1.5, abs=0.12)
+    assert event.numbers["usual_gap_s"] == pytest.approx(5.0, abs=0.3)
     assert "double_feed" in line.records[-1].flags
 
 
