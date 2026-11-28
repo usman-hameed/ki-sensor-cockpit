@@ -2,17 +2,18 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { controller } from "../controller";
 import { api } from "../lib/api";
-import { clock, KIND_LABEL } from "../lib/format";
+import { KIND_LABEL } from "../lib/format";
 import { meters } from "../lib/live";
 import { useStore, type FeedItem } from "../state/store";
 import type { VoiceActivity } from "../types";
+import { KIND_DE } from "./de";
 import { Icon } from "./Icon";
 
 const ACTIVITY_RGB: Record<VoiceActivity, [number, number, number]> = {
-  idle: [106, 82, 255],
-  listening: [19, 160, 110],
-  thinking: [138, 124, 248],
-  speaking: [106, 82, 255],
+  idle: [196, 22, 28],
+  listening: [30, 142, 62],
+  thinking: [217, 119, 6],
+  speaking: [196, 22, 28],
 };
 
 /** The copilot's presence: rings that breathe with its voice. */
@@ -79,18 +80,18 @@ function Item({ item, assistant }: { item: FeedItem; assistant: string }) {
       return (
         <li className={`feed-alert sev-${e.severity}`}>
           <div className="feed-meta">
-            <strong>{KIND_LABEL[e.kind]} on {sensorName(e.sensor)}</strong>
-            <time>{clock(e.t)}</time>
+            <strong>{KIND_DE[e.kind] ?? KIND_LABEL[e.kind]} am {sensorName(e.sensor)}</strong>
+            <time>{new Date(e.t * 1000).toLocaleTimeString("de-DE")}</time>
           </div>
           <p>{e.summary}</p>
           <div className="feed-actions">
-            <button onClick={() => controller.showForEvent(e)}>Show chart</button>
-            <button onClick={() => void api.createReport(e.id)}>Write report</button>
+            <button onClick={() => controller.showForEvent(e)}>Diagramm zeigen</button>
+            <button onClick={() => void api.createReport(e.id)}>Bericht schreiben</button>
             {e.kind === "wrong_part" && (
-              <button onClick={() => controller.openPartCheck(e.sensor)}>Part check</button>
+              <button onClick={() => controller.openPartCheck(e.sensor)}>Teileprüfung</button>
             )}
             {(e.kind === "jam" || e.kind === "double_feed" || e.kind === "trend" || e.kind === "wrong_part") && (
-              <button onClick={() => controller.openParts(e.sensor)}>Part log</button>
+              <button onClick={() => controller.openParts(e.sensor)}>Teile-Log</button>
             )}
           </div>
         </li>
@@ -99,7 +100,7 @@ function Item({ item, assistant }: { item: FeedItem; assistant: string }) {
     case "say":
       return (
         <li className={`feed-say who-${item.who}`}>
-          <span className="feed-who">{item.who === "you" ? "You" : item.who === "ai" ? assistant : "Cockpit"}</span>
+          <span className="feed-who">{item.who === "you" ? "Du" : item.who === "ai" ? assistant : "Cockpit"}</span>
           <p>{item.text}{!item.final && <span className="caret" />}</p>
         </li>
       );
@@ -107,8 +108,8 @@ function Item({ item, assistant }: { item: FeedItem; assistant: string }) {
       return (
         <li className="feed-note feed-report">
           <Icon name="doc" size={16} />
-          <p>Report ready: {item.title}</p>
-          <button onClick={() => controller.openReport(item.reportId)}>Open</button>
+          <p>Bericht fertig: {item.title}</p>
+          <button onClick={() => controller.openReport(item.reportId)}>Öffnen</button>
         </li>
       );
   }
@@ -135,10 +136,10 @@ export function Copilot() {
   }, [feed]);
 
   const status = ai
-    ? { listening: "Listening", thinking: "Thinking", speaking: "Speaking", idle: "Ready. Hold Space to talk" }[activity]
-    : voiceMode === "connecting" ? "Connecting the voice…"
-      : voiceMode === "error" ? `Voice failed: ${voiceError ?? "unknown error"}`
-        : config?.voice.enabled ? "Voice is off" : "Browser voice (no API key)";
+    ? { listening: "Hört zu", thinking: "Denkt nach", speaking: "Spricht", idle: "Bereit. Leertaste halten zum Sprechen" }[activity]
+    : voiceMode === "connecting" ? "Verbinde die Stimme …"
+      : voiceMode === "error" ? `Stimme fehlgeschlagen: ${voiceError ?? "unbekannter Fehler"}`
+        : config?.voice.enabled ? "KI-Stimme aus" : "Browser-Stimme (kein API-Schlüssel)";
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -153,14 +154,14 @@ export function Copilot() {
   return (
     <aside className="copilot">
       <header className="copilot-head">
-        <Orb size={56} />
+        <Orb size={34} />
         <div>
           <div className="copilot-name">{assistant}</div>
           <div className={`copilot-status ${voiceMode === "error" ? "is-error" : ""}`}>{status}</div>
         </div>
         {config?.voice.enabled && (
           <button className="quiet-btn" onClick={() => (ai ? controller.disconnectVoice() : void controller.connectVoice())}>
-            {ai ? "Disconnect" : voiceMode === "connecting" ? "Connecting…" : "Connect voice"}
+            {ai ? "Trennen" : voiceMode === "connecting" ? "Verbinde …" : "KI verbinden"}
           </button>
         )}
       </header>
@@ -172,9 +173,8 @@ export function Copilot() {
           }}>
         {feed.length === 0 && (
           <li className="feed-empty">
-            <p>{assistant} is watching {config?.sensors.length === 1 ? "the sensor" : `${config?.sensors.length ?? 0} sensors`} and will speak up when something changes.</p>
-            <p className="muted">Try “show me the whole shift”, “how are the readings spread?”, “do the sensors move
-              together?”, “explain this chart” or “is sensor 1 set up well?”.</p>
+            <p>{assistant} beobachtet {config?.sensors.length === 1 ? "den Sensor" : `${config?.sensors.length ?? 0} Sensoren`} und meldet sich, wenn sich etwas ändert.</p>
+            <p className="muted">Zum Beispiel: „how many parts“, „show me a bar chart“, „explain this chart“ oder „write a report“.</p>
           </li>
         )}
         {feed.map((item) => <Item key={item.id} item={item} assistant={assistant} />)}
@@ -183,18 +183,18 @@ export function Copilot() {
       <form className="composer" onSubmit={submit}>
         <button type="button" className={`talk ${holding ? "is-on" : ""}`}
                 onPointerDown={press} onPointerUp={release} onPointerLeave={release} onPointerCancel={release}
-                title="Hold to talk (or hold Space)">
+                title="Halten zum Sprechen (oder Leertaste halten)">
           <Icon name="mic" size={22} />
         </button>
         <input value={text} onChange={(e) => setText(e.target.value)}
-               placeholder={`Ask ${assistant} something`} aria-label={`Message to ${assistant}`} />
-        <button className="send" type="submit" title="Send" disabled={!text.trim()}>
+               placeholder={`Frag ${assistant} …`} aria-label={`Nachricht an ${assistant}`} />
+        <button className="send" type="submit" title="Senden" disabled={!text.trim()}>
           <Icon name="send" size={18} />
         </button>
       </form>
       <label className="speak-toggle">
         <input type="checkbox" checked={speakAlerts} onChange={(e) => patch({ speakAlerts: e.target.checked })} />
-        Read alerts out loud
+        Meldungen vorlesen
       </label>
     </aside>
   );

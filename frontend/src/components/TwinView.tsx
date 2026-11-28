@@ -74,7 +74,7 @@ export function TwinView() {
             for (const sensor of get().config?.sensors ?? []) {
               const el = valueRefs.current.get(sensor.id);
               const latest = series(sensor.id).latest();
-              if (el) el.textContent = latest && Number.isFinite(latest.v) ? pos(latest.v, shownFor(sensor), 2) : "no reading";
+              if (el) el.textContent = latest && Number.isFinite(latest.v) ? pos(latest.v, shownFor(sensor), 2).replace(".", ",").replace("-", "−") : "kein Wert";
             }
           }
         }
@@ -102,7 +102,7 @@ export function TwinView() {
       <div className="twin-canvas" ref={hostRef} />
       {failed && (
         <div className="twin-failed">
-          <p>The 3D view needs WebGL, which this browser has switched off.</p>
+          <p>Das 3D-Modell braucht WebGL, das in diesem Browser ausgeschaltet ist.</p>
           <p className="muted">{failed}</p>
         </div>
       )}
@@ -121,7 +121,7 @@ export function TwinView() {
           </span>
         </div>
       ))}
-      <div className="twin-hint">Drag to look around</div>
+      <div className="twin-hint">Ziehen zum Drehen</div>
     </div>
   );
 }

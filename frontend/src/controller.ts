@@ -814,10 +814,6 @@ class Controller {
         else if (s.manualHit) s.patch({ manualHit: null });
         else s.patch({ qrOpen: false, alert: null });
         break;
-      case "j":
-      case "J":
-        this.toggleMission();
-        break;
       case "r":
       case "R":
         this.openReport();

@@ -43,8 +43,8 @@ export type ChartOption = echarts.EChartsCoreOption;
 // Option builders read these objects, so a theme switch only needs a redraw.
 const LIGHT = {
   text: "#4f5d6b", dim: "#7d8a97", grid: "rgba(21, 32, 43, 0.07)", axis: "rgba(21, 32, 43, 0.22)",
-  cyan: "#5a3ff2", violet: "#8a7cf8", amber: "#e08a00", red: "#d7263d", green: "#138a5e",
-  series: ["#5a3ff2", "#e0567a", "#138a5e", "#e08a00"],
+  cyan: "#c4161c", violet: "#68717b", amber: "#d97706", red: "#c4161c", green: "#1e8e3e",
+  series: ["#c4161c", "#1d2329", "#1e6fd9", "#d97706"],
 };
 const DARK = {
   text: "#a9b8d0", dim: "#6d7c95", grid: "rgba(150, 170, 255, 0.08)", axis: "rgba(150, 170, 255, 0.24)",

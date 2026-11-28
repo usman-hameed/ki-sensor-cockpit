@@ -10,6 +10,36 @@ export function CameraPreview() {
   const box = useRef<HTMLDivElement>(null);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [turn, setTurn] = useState(camera.turn);
+  // where the picture floats: dragged by its bar, remembered
+  const [at, setAt] = useState<{ x: number; y: number } | null>(() => {
+    try { return JSON.parse(localStorage.getItem("cockpit-camera-at") ?? "null"); } catch { return null; }
+  });
+  const [dragging, setDragging] = useState(false);
+  const drag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest("button, select")) return;
+    const pip = e.currentTarget.parentElement;
+    if (!pip) return;
+    const r = pip.getBoundingClientRect();
+    const dx = e.clientX - r.left;
+    const dy = e.clientY - r.top;
+    setDragging(true);
+    let last = { x: r.left, y: r.top };
+    const move = (ev: PointerEvent) => {
+      last = {
+        x: Math.min(Math.max(ev.clientX - dx, 0), window.innerWidth - r.width),
+        y: Math.min(Math.max(ev.clientY - dy, 0), window.innerHeight - 40),
+      };
+      setAt(last);
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      setDragging(false);
+      try { localStorage.setItem("cockpit-camera-at", JSON.stringify(last)); } catch { /* private mode */ }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
 
   // every camera Windows offers (a phone in USB webcam mode appears here once it is plugged in)
   useEffect(() => {
@@ -33,18 +63,19 @@ export function CameraPreview() {
   if (!cam.on) return null;
   const flash = Date.now() - cam.snapAt < 900;
   return (
-    <div className="camera-pip">
+    <div className={`camera-pip ${dragging ? "is-dragging" : ""}`}
+      style={at ? { left: at.x, top: at.y, right: "auto", bottom: "auto" } : undefined}>
       <div className={`camera-frame turn-${turn}`} ref={box}>
         {flash && <div className="camera-flash" key={cam.snapAt} />}
       </div>
-      <div className="camera-bar">
+      <div className="camera-bar" onPointerDown={drag} title="Ziehen zum Verschieben">
         <span className="camera-dot" />
-        <span className="camera-label">{cam.snapPart ? `Part ${cam.snapPart} photographed` : "Live"}</span>
-        <button className="icon-only" title="Turn the picture a quarter (also the photos)" onClick={() => setTurn(camera.rotate())}>⟳</button>
-        <button className="icon-only" title="Camera off" onClick={() => void controller.toggleCamera()}><Icon name="close" /></button>
+        <span className="camera-label">{cam.snapPart ? `Teil ${cam.snapPart} fotografiert` : "Live · ziehen zum Verschieben"}</span>
+        <button className="icon-only" title="Bild um 90° drehen (auch die Fotos)" onClick={() => setTurn(camera.rotate())}>⟳</button>
+        <button className="icon-only" title="Kamera aus" onClick={() => void controller.toggleCamera()}><Icon name="close" /></button>
       </div>
       <div className="camera-bar">
-        <select className="camera-select" value={camera.deviceId ?? ""} title="Which camera"
+        <select className="camera-select" value={camera.deviceId ?? ""} title="Welche Kamera"
           onChange={(e) => void controller.useCamera(e.target.value)}>
           {devices.map((d, i) => <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i + 1}`}</option>)}
         </select>

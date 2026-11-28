@@ -63,10 +63,10 @@ const PART_COLOR: Record<TwinPart["state"], THREE.Color> = {
 };
 
 const STATE_COLOR: Record<TwinState, THREE.Color> = {
-  ok: new THREE.Color("#6a52ff"),
+  ok: new THREE.Color("#d8262c"),
   warning: new THREE.Color("#ffa51f"),
   critical: new THREE.Color("#ff3150"),
-  invalid: new THREE.Color("#6a52ff"),
+  invalid: new THREE.Color("#d8262c"),
 };
 
 const LOOK = {
@@ -228,7 +228,7 @@ export class Twin {
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     this.scene.add(floor);
-    const grid = new THREE.GridHelper(24, 48, "#6a52ff", "#6a52ff");
+    const grid = new THREE.GridHelper(24, 48, "#d8262c", "#d8262c");
     this.gridMat = grid.material as THREE.LineBasicMaterial;
     this.gridMat.transparent = true;
     this.gridMat.opacity = 0;
@@ -240,7 +240,7 @@ export class Twin {
 
     // the scan plane that sweeps the machine once when mission mode starts
     this.scan = new THREE.Mesh(new THREE.PlaneGeometry(6, 4),
-      new THREE.MeshBasicMaterial({ color: "#6a52ff", transparent: true, opacity: 0, toneMapped: false,
+      new THREE.MeshBasicMaterial({ color: "#d8262c", transparent: true, opacity: 0, toneMapped: false,
         side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
     this.scan.rotation.x = -Math.PI / 2;
     this.scene.add(this.scan);
@@ -333,14 +333,14 @@ export class Twin {
       this.scene.add(spot);
 
       // the measuring range: a faint band from its start down to its end, where the readings are valid
-      const band = new THREE.MeshBasicMaterial({ color: "#6a52ff", transparent: true, opacity: 0.07, toneMapped: false,
+      const band = new THREE.MeshBasicMaterial({ color: "#d8262c", transparent: true, opacity: 0.07, toneMapped: false,
         side: THREE.DoubleSide, depthWrite: false });
       const bandMesh = new THREE.Mesh(new THREE.BoxGeometry(0.5, RANGE_TOP - RANGE_BOTTOM, 0.36), band);
       bandMesh.position.set(x, (RANGE_TOP + RANGE_BOTTOM) / 2, 0);
       this.scene.add(bandMesh);
       for (const y of [RANGE_TOP, RANGE_BOTTOM]) {
         const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(0.5, 0.36)),
-          new THREE.LineBasicMaterial({ color: "#6a52ff", transparent: true, opacity: 0.35, toneMapped: false }));
+          new THREE.LineBasicMaterial({ color: "#d8262c", transparent: true, opacity: 0.35, toneMapped: false }));
         edge.rotation.x = -Math.PI / 2;
         edge.position.set(x, y, 0);
         this.scene.add(edge);
