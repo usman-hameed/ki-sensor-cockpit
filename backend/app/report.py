@@ -561,8 +561,6 @@ def render_passport_html(engine: Engine, sid: str, number: int, embed: bool = Fa
                   if track.empty_um is not None else f"reads {length(ref.center_um)}, ± {length(ref.half_width_um)}")
     words = {"jam": "possible jam", "double_feed": "possible double feed", "unsteady": "never lay still"}
     rows = [("Verdict", "the taught part" if good else "a different part"),
-            ("Height above the plate", length(record.height_um) if record.height_um is not None
-             else "not measured: the empty plate was not taught"),
             ("Top surface (sensor reading)", length(record.position_um)),
             ("Difference to the taught part", length(record.deviation_um, signed=True)),
             ("Taught part", taught),
@@ -571,6 +569,8 @@ def render_passport_html(engine: Engine, sid: str, number: int, embed: bool = Fa
             ("Time since the part before", "–" if record.gap_s is None else f"{record.gap_s:.1f} s"),
             ("Notes", ", ".join(words.get(f, f) for f in record.flags) or "none"),
             ("Measured by", f"{cfg.name}, {cfg.model}")]
+    if record.height_um is not None:  # only known when the empty plate is in range and taught
+        rows.insert(1, ("Height above the plate", length(record.height_um)))
     facts = "".join(f"<div><b>{_esc(k)}</b>{_esc(v)}</div>" for k, v in rows)
     alerts = [e for e in engine.events if e.sensor == sid and record.t_start - 1.0 <= e.t <= record.t_end + 0.5]
     alert_rows = "".join(f"<li><span class='chip {e.severity}'>{_esc(KIND_TITLE.get(e.kind, e.kind))}</span>"

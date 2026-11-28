@@ -13,7 +13,7 @@ passport and says what is going on.
    Press **Unlock** in the top bar if it asks for the token.
 2. The top bar says **Live** and the **Sensor** panel on the left says Connection: Live.
 3. **Part check** tab: plate empty, **Teach the empty plate** (only if the plate shows a reading; without it the
-   passport cannot show the height above the plate). Then one good part in the laser spot, **Teach this part**.
+   passport cannot show the height above the plate). If it says the plate is outside the measuring range, that is fine: skip it. Then one good part in the laser spot, **Teach this part**.
    Take the part away: "Nothing under the sensor" and nothing is flagged.
 4. **Part log** tab, **New run**, **Clear the part log**: the counter starts at 0 on stage.
 5. Press **C** for the camera. Check the picture is upright (turn it with the rotate button) and drag it into a
@@ -45,7 +45,7 @@ Press **⇄ 3D model large** (or double-click the small 3D model): the 3D model 
 to the right. Put good parts under the laser one after the other: put one down, count to two, take it away, the
 next one.
 
-- "We taught it one good part and the empty plate. That is all the setup there is."
+- "We taught it one good part. That is all the setup there is."
 - Each part shows up green in the 3D model, and the counter in the Part log panel goes up the moment it leaves.
 - "Every part gets a number, its height measured to a micrometre, and a photo." Point at the camera picture: it says
   "Part N photographed".
@@ -116,7 +116,6 @@ Micro-Epsilon's MEDAQLib, any of their sensors plugs in the same way. Thank you.
 | The camera picture is black or gone | Press **C** twice. If it stays black, go on: the passport still has every number, only without the photo. |
 | Taking a part away raises "Different part" | The empty plate was not taught (or the plate moved): **Part check**, **Teach the empty plate**. |
 | The counter does not count | Teach the good part again in the **Part check** tab, with the part in the laser spot. |
-| The passport says the height is "not measured" | The empty plate was not taught. The difference to the taught part is still there; say that. |
 | A "possible jam" pops up while you talk | "It noticed that a part has been lying there far longer than the parts before. On a line that is a jam." Take the part away. |
 | The cockpit says "sensor not connected" | Check the Ethernet cable. The cockpit reconnects by itself within seconds. |
 | The 3D model is blank | Press **⇄ Live signal large** and go on with the live signal; the counter, the alerts and the charts still work. |
