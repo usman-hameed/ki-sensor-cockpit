@@ -22,14 +22,14 @@ function rhythmText(station: StationState): string {
   }
   const stay = r.dwell_s !== null ? `Parts usually stay ${r.dwell_s.toFixed(1)} s` : "";
   const gap = r.gap_s !== null ? ` and come ${r.gap_s.toFixed(1)} s apart` : "";
-  return `${stay}${gap}. A part that stays far longer is a possible jam, one that comes far sooner a possible double feed.`;
+  return `${stay}${gap}. A part that stays longer than 6 s is a possible jam, one that comes less than 2 s after the one before a possible double feed.`;
 }
 
 function trendText(station: StationState): { text: string; warn: boolean } {
   const t = station.trend;
   if (!t) return { text: "The height trend shows after 8 good parts.", warn: false };
   if (!t.clear) return { text: "No trend in the heights: the good parts scatter around the same value.", warn: false };
-  const left = t.parts_to_limit !== null ? ` At this rate they leave the band in about ${Math.round(t.parts_to_limit)} parts.` : "";
+  const left = t.parts_to_limit !== null ? ` At this rate they leave the band in about ${Math.round(t.parts_to_limit)} part${Math.round(t.parts_to_limit) === 1 ? "" : "s"}.` : "";
   return { text: `The good parts get ${t.direction} by ${Math.abs(t.slope_um_per_part).toFixed(1)} µm per part.${left}`,
     warn: t.parts_to_limit !== null && t.parts_to_limit <= 40 };
 }

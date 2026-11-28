@@ -110,7 +110,7 @@ def parts(engine: Engine, sid: str, window_s: float | None = None) -> dict[str, 
                  "parts_to_limit": info["parts_to_limit"]}
         if info["clear"]:
             left = info["parts_to_limit"]
-            ahead = (f" At this rate they leave the band in about {left:.0f} parts." if left is not None
+            ahead = (f" At this rate they leave the band in about {left:.0f} part{'' if round(left) == 1 else 's'}." if left is not None
                      else "")
             steps.append(step(f"The good parts get {'higher' if slope > 0 else 'lower'} by "
                               f"{fmt(abs(float(slope)), 1)} µm per part.{ahead}",

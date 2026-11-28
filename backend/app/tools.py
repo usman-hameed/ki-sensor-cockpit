@@ -95,7 +95,7 @@ def analyze(engine: Engine, sensor: str, window_s: float = 60.0) -> dict[str, An
         if trend and trend.get("clear") and trend.get("parts_to_limit") is not None:
             observations.append(f"The good parts get {trend['direction']} by {abs(trend['slope_um_per_part'])} µm "
                                 f"per part; at this rate they leave the band in about "
-                                f"{trend['parts_to_limit']:.0f} parts.")
+                                f"{trend['parts_to_limit']:.0f} part{'' if round(trend['parts_to_limit']) == 1 else 's'}.")
 
     if not observations:
         observations.append("Nothing unusual: the target is inside the measuring range and the readings are valid.")

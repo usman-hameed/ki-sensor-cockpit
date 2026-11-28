@@ -4,11 +4,33 @@ A quality station and voice copilot for Micro-Epsilon sensors, built by team Meg
 challenge at Hochschule Landshut. An optoNCDT 5500 laser sensor looks at a part on a plate. The cockpit learns one
 good part, then counts and measures every part that comes under the sensor, flags every other part the moment it
 lands, warns of a jam, a double feed or a height trend, and explains it all in plain words, on the screen, by voice
-and on the phones of everyone in the room.
+and on the phones of everyone in the room. A camera photographs every part, and every part gets a passport.
 
-![Cockpit](docs/screenshot-cockpit.png)
+At the hackathon it ran on a real optoNCDT ILD5500-10. The screenshots below were taken with the stand-in sensor in
+`backend/scripts/fake_ild5500.py`, which plays a production line, so you can see the same screens without the
+hardware (see [Try it without the sensor](#try-it-without-the-sensor)).
 
-![The quality station: every part, its height and verdict](docs/screenshot-charts.png)
+![The cockpit: live reading, measuring range, live signal, 3D model and the copilot](docs/screenshot-cockpit.png)
+
+![The 3D model in the middle: the taught part is green, a different part turns red](docs/screenshot-3d.png)
+
+![The quality station: every part with its height, stay, gap and verdict](docs/screenshot-parts.png)
+
+![The run report with a QR code for the phone](docs/screenshot-report.png)
+
+## For the jury in two minutes
+
+- **The problem:** a laser sensor measures to a micrometre, but the shop floor wants to know whether this is the right
+  part, whether the line is running and whether something is about to go wrong.
+- **What we built:** teach one good part, and the cockpit counts, measures and photographs every part, flags a
+  different part within half a second, warns of a jam, a double feed or a height trend, and says so out loud and on
+  every phone in the room.
+- **The AI never makes numbers up:** counts, heights and limits come from tool calls on the measured data; answers
+  about the sensor come from the Micro-Epsilon manuals and name the page. The language model only phrases them.
+- **Traceability:** every part has a passport (photo, height, difference to the taught part, alerts), and the whole run
+  has a report. Both open on a phone through a QR code.
+- **Plug and play:** the sensor's own Ethernet stream, or Micro-Epsilon's MEDAQLib to find any of their sensors.
+- **The pitch:** [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
 
 ## What it does
 
@@ -21,7 +43,8 @@ and on the phones of everyone in the room.
 | Charts on request | "Show me a bar chart", "show the part heights", "show a histogram": the cockpit draws the chart and walks you through it, pointing at each finding while it speaks. |
 | Voice copilot | Epsilon (OpenAI Realtime) answers questions about the sensor and the parts. Every number comes from a tool call on the real data; without a key the browser voice and typed commands still work. |
 | Reports | The **Report** tab gives the run report: every part and alert of the run, with a code for the phone. One click or "write a report" on an alert: what happened, the heights of the last parts, likely causes, next steps, with the manual page. Save as PDF or scan the code to take it on a phone. |
-| Manuals | Drop the Micro-Epsilon PDFs into the Manuals sheet; Epsilon answers from them and opens the page. |
+| Manuals | Epsilon answers questions about the sensor from the Micro-Epsilon manuals (a whole library can be set in `MANUAL_LIBRARY_DIRS`), scoped to the right product, with the section and page. |
+| Typed chat | Type instead of talking: the same copilot, the same tools, answers in text. |
 | Phones | The jury scans a code and their phones flash, beep and vibrate on every alert, and list the last parts. |
 | Camera and part passports | A camera (a phone over USB works) photographs every part while it lies under the sensor. Click a part in the part log for its passport: photo, height, difference to the taught part, alerts, and a code to take it on a phone. |
 | Plug and play | `type: medaqlib` lets Micro-Epsilon's MEDAQLib find any supported sensor on Ethernet, USB or the serial ports. |
@@ -101,10 +124,11 @@ git-ignored), so a restart loses neither. Said honestly: a distance sensor sees 
 different part with the same height cannot be told apart, and two equal parts that follow without the plate showing
 in between look like one part that stays long.
 
-## Rehearse without the sensor
+## Try it without the sensor
 
 `backend/scripts/fake_ild5500.py` plays an optoNCDT 5500 on `127.0.0.1:1024` with the same Ethernet format. Start it,
-set `LIVE_SENSOR_HOST=127.0.0.1` in `backend/.env` and start the cockpit.
+set `LIVE_SENSOR_HOST=127.0.0.1` in `backend/.env` and start the cockpit. Then teach the empty plate in the first
+15 s and the good part while part 1 rests.
 
 ```powershell
 cd backend
@@ -162,7 +186,8 @@ typed commands run the same cockpit.
 - `backend/app/sources/ild5500.py`: the sensor's Ethernet stream; `medaqlib.py`: MEDAQLib through ctypes.
 - `backend/app/partcheck.py`: teaching and the different-part alert; `station.py`: the quality station.
 - `backend/app/part_charts.py` and `explore.py`: the charts and their explanation steps.
-- `backend/app/report.py`: the reports; `knowledge.py`: the manuals.
+- `backend/app/report.py`: the incident report, the run report and the part passport; `photos.py`: the part photos.
+- `backend/app/knowledge.py` and `manual_rag.py`: the manuals and the answers from them; `chat.py`: the typed chat.
 - `frontend/src/lib/twin.ts`: the digital twin; `components/PartsPanel.tsx`: the quality station sheet.
 - `docs/CONTRACT.md`: the messages and endpoints between backend and cockpit.
 
@@ -170,7 +195,7 @@ typed commands run the same cockpit.
 
 ```powershell
 cd backend
-.\.venv\Scripts\python.exe -m pytest          # 151 tests: sensor stream, MEDAQLib, part check, quality station,
+.\.venv\Scripts\python.exe -m pytest          # 172 tests: sensor stream, MEDAQLib, part check, quality station,
                                               # charts, reports, manuals, API and WebSockets
 cd ..\frontend
 npx tsc --noEmit
@@ -184,9 +209,14 @@ npm run build
 | The cockpit says "sensor not connected" | Check the cable, the laptop's address (169.254.168.10, mask 255.255.0.0) and that nothing else reads the sensor. The cockpit reconnects by itself. |
 | "Connected, but no readings" | In the sensor's web page set the output interface to Ethernet and Server TCP/IP on port 1024. |
 | "Most readings are invalid" | No target, the target is outside the measuring range, or the surface is too dark or shiny. The cockpit shows the sensor's own status. |
-| Taking a part away raises "Different part" | Teach the empty plate in the part check. |
-| The counter does not count | The station needs both the empty plate and a good part taught. |
+| Taking a part away raises "Different part" | Teach the empty plate in the part check. If the plate is outside the measuring range, it cannot be taught and is not needed. |
+| The passport has no height above the plate | The height needs the empty plate. When the plate is outside the measuring range, the passport shows the difference to the taught part instead. |
+| The counter does not count | Teach the good part again with the part in the laser spot. Teach the empty plate too if the plate gives a reading. |
 | "Possible jam" while you talk | A part lay under the sensor much longer than the parts before. Take it away, or start a **New run** before the pitch. |
 | The reading differs from the web page | The sensor was mastered or zeroed: clear it in the web page, or set `reference_mm` in `sensors.live.yaml`. |
 | The page looks old after a pull | `npm run build` in `frontend`, restart, Ctrl+F5. |
 | The 3D view is blank | Use Chrome or Edge (WebGL). |
+
+## Team
+
+Team Mega Mind, KI Sensor Cockpit challenge by Micro-Epsilon, Hochschule Landshut, November 2026.

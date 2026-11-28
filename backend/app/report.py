@@ -483,7 +483,7 @@ def render_run_html(engine: Engine, sid: str, embed: bool = False) -> str:
     if trend and trend.get("clear"):
         left = trend.get("parts_to_limit")
         trend_txt = (f"The good parts get {trend['direction']} by {abs(trend['slope_um_per_part']):.1f} µm per part"
-                     + (f"; at this rate they leave the band in about {left:.0f} parts." if left is not None else "."))
+                     + (f"; at this rate they leave the band in about {left:.0f} part{'' if round(left) == 1 else 's'}." if left is not None else "."))
     elif trend:
         trend_txt = "No trend in the heights of the good parts."
     chart = _parts_chart(engine, sid)

@@ -455,7 +455,7 @@ class Station:
             numbers={"slope_um_per_part": info["slope_um_per_part"], "parts_to_limit": left,
                      "trend_parts": info["parts"], "r2": info["r2"]},
             summary=(f"Height trend at {cfg.name}: the good parts get {info['direction']} by {per_part} per part. "
-                     f"At this rate they leave the accepted band in about {left:.0f} parts. A worn tool or a "
+                     f"At this rate they leave the accepted band in about {left:.0f} part{'' if round(left) == 1 else 's'}. A worn tool or a "
                      f"fixture that moves can do this."))
 
     def active_kinds(self, sid: str) -> list[str]:
