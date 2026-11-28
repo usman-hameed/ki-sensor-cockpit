@@ -34,7 +34,7 @@ function PartCheckFold({ sensor }: { sensor: SensorInfo }) {
     setBusy(true);
     try {
       await api.partLearn(sensor.id, { kind });
-      toast(kind === "empty" ? "Leere Auflage gelernt." : "Gutes Teil gelernt.", "ok");
+      toast(kind === "empty" ? "Empty plate taught." : "Good part taught.", "ok");
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) void controller.enterToken();
       toast(String(e instanceof Error ? e.message : e), "error");
@@ -42,21 +42,21 @@ function PartCheckFold({ sensor }: { sensor: SensorInfo }) {
       setBusy(false);
     }
   };
-  if (!part?.supported) return <p className="muted small">Die Teileprüfung braucht einen Sensor in µm.</p>;
+  if (!part?.supported) return <p className="muted small">The part check needs a sensor that reports µm.</p>;
   const ref = part.reference;
   const stateTone = part.state === "different" ? "bad" : part.state === "match" ? "ok" : "";
   return (
     <>
-      <div className="muted small">Unter dem Sensor</div>
+      <div className="muted small">Under the sensor</div>
       <div className={`state-word ${stateTone}`}>{PART_DE[part.state]}</div>
-      {ref && <Row k="Gelerntes Teil" v={`${pos(ref.center_um, sensor, 4)} ${unitOf(sensor)}`} />}
-      {ref && <Row k="Abweichung" v={`± ${pos(ref.half_width_um, sensor, 4)} ${unitOf(sensor)}`} />}
-      {part.empty_um !== null && <Row k="Leere Auflage" v={`${pos(part.empty_um, sensor, 4)} ${unitOf(sensor)}`} />}
-      <Row k="Jetzt" v={`${pos(latest && Number.isFinite(latest.v) ? latest.v : null, sensor, 4)} ${unitOf(sensor)}`} tone={stateTone} />
+      {ref && <Row k="Taught part" v={`${pos(ref.center_um, sensor, 4)} ${unitOf(sensor)}`} />}
+      {ref && <Row k="Deviation" v={`± ${pos(ref.half_width_um, sensor, 4)} ${unitOf(sensor)}`} />}
+      {part.empty_um !== null && <Row k="Empty plate" v={`${pos(part.empty_um, sensor, 4)} ${unitOf(sensor)}`} />}
+      <Row k="Now" v={`${pos(latest && Number.isFinite(latest.v) ? latest.v : null, sensor, 4)} ${unitOf(sensor)}`} tone={stateTone} />
       <div className="fold-actions">
-        {part.empty_um === null && !ref && <button className="btn" disabled={busy} onClick={() => void learn("empty")}>Leere Auflage lernen</button>}
-        <button className="btn primary" disabled={busy} onClick={() => void learn("part")}>{ref ? "Neu lernen" : "Gutes Teil lernen"}</button>
-        <button className="link" onClick={() => controller.openPartCheck(sensor.id)}>Ganze Teileprüfung</button>
+        {part.empty_um === null && !ref && <button className="btn" disabled={busy} onClick={() => void learn("empty")}>Teach the empty plate</button>}
+        <button className="btn primary" disabled={busy} onClick={() => void learn("part")}>{ref ? "Teach again" : "Teach a good part"}</button>
+        <button className="link" onClick={() => controller.openPartCheck(sensor.id)}>Full part check</button>
       </div>
     </>
   );
@@ -71,32 +71,32 @@ export function SidePanels({ sensor }: { sensor: SensorInfo | undefined }) {
   const live = st?.live;
   return (
     <aside className="side">
-      <Fold title="Teileprüfung" open><PartCheckFold sensor={sensor} /></Fold>
-      <Fold title="Teile-Log" count={`${station?.parts ?? 0} Teile`}>
+      <Fold title="Part check" open><PartCheckFold sensor={sensor} /></Fold>
+      <Fold title="Part log" count={`${station?.parts ?? 0} parts`}>
         {station ? (
           <>
-            <Row k="Teile" v={String(station.parts)} />
-            <Row k="Gut" v={String(station.good)} tone="ok" />
-            <Row k="Abweichend" v={String(station.different)} tone={station.different ? "bad" : ""} />
-            <Row k="Pro Minute" v={station.per_minute !== null ? de(station.per_minute, 1) : "–"} />
-            <Row k="Ausbeute" v={station.yield_percent !== null ? `${de(station.yield_percent, 0)} %` : "–"} />
+            <Row k="Parts" v={String(station.parts)} />
+            <Row k="Good" v={String(station.good)} tone="ok" />
+            <Row k="Different" v={String(station.different)} tone={station.different ? "bad" : ""} />
+            <Row k="Per minute" v={station.per_minute !== null ? de(station.per_minute, 1) : "–"} />
+            <Row k="Yield" v={station.yield_percent !== null ? `${de(station.yield_percent, 0)} %` : "–"} />
           </>
-        ) : <p className="muted small">Noch keine Teile.</p>}
-        <div className="fold-actions"><button className="link" onClick={() => controller.openParts(sensor.id)}>Ganzes Teile-Log</button></div>
+        ) : <p className="muted small">No parts yet.</p>}
+        <div className="fold-actions"><button className="link" onClick={() => controller.openParts(sensor.id)}>Full part log</button></div>
       </Fold>
       <Fold title="Sensor">
-        <Row k="Modell" v={sensor.model} />
-        <Row k="Verbindung" v={live ? (live.state === "streaming" ? "Live" : live.state === "offline" ? "Nicht verbunden" : "Keine Messwerte") : "–"}
+        <Row k="Model" v={sensor.model} />
+        <Row k="Connection" v={live ? (live.state === "streaming" ? "Live" : live.state === "offline" ? "Not connected" : "No readings") : "–"}
              tone={live?.state === "streaming" ? "ok" : live ? "bad" : ""} />
-        {live?.host && <Row k="Adresse" v={live.host} />}
+        {live?.host && <Row k="Address" v={live.host} />}
         {live?.rate_hz ? <Row k="Rate" v={`${de(live.rate_hz / 1000, 1)} kHz`} /> : null}
-        <Row k="Rauschen" v={`${de(st?.noise ?? null, 2)} ${sensor.unit}`} />
-        {live?.serial ? <Row k="Seriennummer" v={String(live.serial)} /> : null}
+        <Row k="Noise" v={`${de(st?.noise ?? null, 2)} ${sensor.unit}`} />
+        {live?.serial ? <Row k="Serial number" v={String(live.serial)} /> : null}
         {live && live.state !== "streaming" && <p className="muted small">{live.message}</p>}
       </Fold>
-      <Fold title="Handbücher" count={String(manuals)}>
-        <p className="muted small">{manuals ? `${manuals} Handbücher geladen: Epsilon antwortet daraus und nennt die Seite.` : "Noch keine Handbücher. Lege die PDFs von Micro-Epsilon hinein."}</p>
-        <div className="fold-actions"><button className="link" onClick={() => patch({ manualsOpen: true })}>Handbücher öffnen</button></div>
+      <Fold title="Manuals" count={String(manuals)}>
+        <p className="muted small">{manuals ? `${manuals} manuals loaded: Epsilon answers from them and names the page.` : "No manuals yet. Add the Micro-Epsilon PDFs."}</p>
+        <div className="fold-actions"><button className="link" onClick={() => patch({ manualsOpen: true })}>Open the manuals</button></div>
       </Fold>
     </aside>
   );

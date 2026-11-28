@@ -11,7 +11,7 @@ function useClock(): string {
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(id);
   }, []);
-  return now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  return now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
 /** One statement about the whole line as a pill: green ok, yellow warning, red critical, grey disconnected. */
@@ -19,7 +19,7 @@ export function useHealth(): { tone: "ok" | "warn" | "bad" | "off"; text: string
   const config = useStore((s) => s.config);
   const status = useStore((s) => s.status);
   const socket = useStore((s) => s.socket);
-  if (socket !== "open") return { tone: "off", text: "Verbinde mit den Sensoren …" };
+  if (socket !== "open") return { tone: "off", text: "Connecting to the sensors …" };
   const sensors = config?.sensors ?? [];
   const notLive = sensors.flatMap((s) => {
     const live = status?.sensors[s.id]?.live;
@@ -27,7 +27,7 @@ export function useHealth(): { tone: "ok" | "warn" | "bad" | "off"; text: string
   });
   if (notLive.length) {
     const { name, live } = notLive[0];
-    const what = live.state === "offline" ? "Sensor nicht verbunden" : live.state === "no_data" ? "verbunden, keine Messwerte" : "keine gültigen Messwerte";
+    const what = live.state === "offline" ? "sensor not connected" : live.state === "no_data" ? "connected, no readings" : "no valid readings";
     return { tone: "warn", text: `${name}: ${what}`, title: live.message };
   }
   const problems = sensors.flatMap((s) => {
@@ -36,12 +36,12 @@ export function useHealth(): { tone: "ok" | "warn" | "bad" | "off"; text: string
   });
   if (!problems.length) {
     const byRange = sensors.length > 0 && sensors.every((s) => s.tolerance_kind === "measuring_range");
-    return { tone: "ok", text: byRange ? "Ziel im Messbereich" : "Sensor in Toleranz" };
+    return { tone: "ok", text: byRange ? "Target in measuring range" : "Sensor in tolerance" };
   }
   const first = problems[0];
-  const what = first.kinds.length ? (KIND_DE[first.kinds[0]] ?? first.kinds[0]) : "Achtung";
+  const what = first.kinds.length ? (KIND_DE[first.kinds[0]] ?? first.kinds[0]) : "attention";
   return { tone: problems.some((p) => p.state === "critical") ? "bad" : "warn",
-    text: `${first.name}: ${what}${problems.length > 1 ? ` und ${problems.length - 1} weitere` : ""}` };
+    text: `${first.name}: ${what}${problems.length > 1 ? ` and ${problems.length - 1} more` : ""}` };
 }
 
 function SensorIcon() {
@@ -69,14 +69,14 @@ export function TopBar() {
   const time = useClock();
   const sensor = config?.sensors[0];
   const live = sensor ? status?.sensors[sensor.id]?.live : undefined;
-  const liveText = live ? (live.state === "streaming" ? "Live" : "nicht live") : "";
+  const liveText = live ? (live.state === "streaming" ? "Live" : "not live") : "";
 
   return (
     <header className="topbar">
       <div className="sensor-card">
         <div className="sensor-thumb"><SensorIcon /></div>
         <div>
-          <div className="eyebrow">Aktueller Sensor{config && config.sensors.length > 1 ? ` (1 von ${config.sensors.length})` : ""}</div>
+          <div className="eyebrow">Current sensor{config && config.sensors.length > 1 ? ` (1 of ${config.sensors.length})` : ""}</div>
           <div className="sensor-name">{sensor?.name ?? "…"}</div>
           <div className="sensor-sub">
             <i className={`dot ${live?.state === "streaming" ? "ok" : live ? "bad" : ""}`} />
@@ -87,26 +87,26 @@ export function TopBar() {
       <div className="topbar-right">
         <span className={`pill pill-lg ${health.tone}`} title={health.title}><i />{health.text}</span>
         {config?.token_required && tokenOk === false && (
-          <button className="btn" onClick={() => void controller.enterToken()} title="Teile lernen und KI-Stimme freischalten">
-            <Icon name="lock" /><span>Entsperren</span>
+          <button className="btn" onClick={() => void controller.enterToken()} title="Unlock teaching parts and the AI voice">
+            <Icon name="lock" /><span>Unlock</span>
           </button>
         )}
-        <button className="btn" onClick={() => patch({ manualsOpen: true })} title="Handbücher, aus denen die KI antwortet">
-          <Icon name="book" /><span>Handbücher{manualCount ? ` (${manualCount})` : ""}</span>
+        <button className="btn" onClick={() => patch({ manualsOpen: true })} title="Manuals the AI answers from">
+          <Icon name="book" /><span>Manuals{manualCount ? ` (${manualCount})` : ""}</span>
         </button>
-        <button className={`btn ${cameraOn ? "is-on" : ""}`} onClick={() => void controller.toggleCamera()} title="Kamera: fotografiert jedes Teil unter dem Sensor (C)">
-          <Icon name="camera" /><span>{cameraOn ? "Kamera an" : "Kamera"}</span>
+        <button className={`btn ${cameraOn ? "is-on" : ""}`} onClick={() => void controller.toggleCamera()} title="Camera: photographs every part under the sensor (C)">
+          <Icon name="camera" /><span>{cameraOn ? "Camera on" : "Camera"}</span>
         </button>
-        <button className="btn" onClick={() => patch({ qrOpen: true })} title="Handys koppeln (Q)">
-          <Icon name="phone" /><span>{phones ? `${phones} Handy${phones === 1 ? "" : "s"}` : "Handys"}</span>
+        <button className="btn" onClick={() => patch({ qrOpen: true })} title="Connect phones (Q)">
+          <Icon name="phone" /><span>{phones ? `${phones} phone${phones === 1 ? "" : "s"}` : "Phones"}</span>
         </button>
-        <button className={`btn icon ${soundOn ? "" : "is-off"}`} onClick={() => controller.toggleSound()} title="Ton an oder aus (M)">
+        <button className={`btn icon ${soundOn ? "" : "is-off"}`} onClick={() => controller.toggleSound()} title="Sound on or off (M)">
           <Icon name={soundOn ? "speaker" : "mute"} />
         </button>
         <time className="clock">{time}</time>
         <div className="brandbox">
           <div className="brand-name">{config?.title ?? "KI Sensor Cockpit"}</div>
-          <div className="brand-sub">für Micro-Epsilon-Sensoren{config?.team ? ` · ${config.team}` : ""}</div>
+          <div className="brand-sub">for Micro-Epsilon sensors{config?.team ? ` · ${config.team}` : ""}</div>
         </div>
       </div>
     </header>
@@ -118,11 +118,11 @@ export function Tabs() {
   const patch = useStore((s) => s.patch);
   const sid = config?.sensors[0]?.id ?? "";
   const tabs: { label: string; icon: string; on?: boolean; go?: () => void }[] = [
-    { label: "Messung", icon: "wave", on: true },
-    { label: "Teileprüfung", icon: "check", go: () => controller.openPartCheck(sid) },
-    { label: "Teile-Log", icon: "sliders", go: () => controller.openParts(sid) },
-    { label: "Bericht", icon: "doc", go: () => patch({ reportId: `run:${sid}`, partsFor: null, partFor: null }) },
-    { label: "Handbücher", icon: "book", go: () => patch({ manualsOpen: true }) },
+    { label: "Measurement", icon: "wave", on: true },
+    { label: "Part check", icon: "check", go: () => controller.openPartCheck(sid) },
+    { label: "Part log", icon: "sliders", go: () => controller.openParts(sid) },
+    { label: "Report", icon: "doc", go: () => patch({ reportId: `run:${sid}`, partsFor: null, partFor: null }) },
+    { label: "Manuals", icon: "book", go: () => patch({ manualsOpen: true }) },
   ];
   return (
     <nav className="tabs">
@@ -145,16 +145,16 @@ export function StatusBar() {
   const station = st?.station;
   const phones = status?.clients.phone ?? 0;
   const ready = socket === "open" && (!live || live.state === "streaming");
-  const rate = live?.rate_hz ? `${(live.rate_hz / 1000).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kHz` : null;
+  const rate = live?.rate_hz ? `${(live.rate_hz / 1000).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kHz` : null;
   return (
     <footer className="statusbar">
-      <span className={`ready ${ready ? "ok" : "bad"}`}><i />{ready ? "Bereit" : socket !== "open" ? "Getrennt" : "Sensor nicht bereit"}</span>
-      {live && <span>Live-Sensor {live.host}</span>}
+      <span className={`ready ${ready ? "ok" : "bad"}`}><i />{ready ? "Ready" : socket !== "open" ? "Disconnected" : "Sensor not ready"}</span>
+      {live && <span>Live sensor {live.host}</span>}
       {rate && <span>{rate}</span>}
-      {st && <span>Rauschen {(st.noise ?? 0).toLocaleString("de-DE", { maximumFractionDigits: 2 })} {sensor?.unit}</span>}
-      {station && <span>{station.parts} Teile · {station.good} gut · {station.different} abweichend</span>}
+      {st && <span>Noise {(st.noise ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} {sensor?.unit}</span>}
+      {station && <span>{station.parts} parts · {station.good} good · {station.different} different</span>}
       <span className="grow" />
-      <span>{phones} Handy{phones === 1 ? "" : "s"} verbunden</span>
+      <span>{phones} phone{phones === 1 ? "" : "s"} connected</span>
     </footer>
   );
 }

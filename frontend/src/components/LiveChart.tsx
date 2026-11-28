@@ -81,7 +81,7 @@ export const LiveChart = forwardRef<LiveChartHandle, { windowS: number; paused: 
             type: "value", min: -win, max: 0, splitNumber: 4,
             axisLine: { lineStyle: { color: "#dcdfe4" } }, axisTick: { show: false },
             splitLine: { lineStyle: { color: "#eceef1" } },
-            axisLabel: { color: "#68717b", fontSize: 12, formatter: (v: number) => (v === 0 ? "jetzt" : `${de(v, 0)} s`) },
+            axisLabel: { color: "#68717b", fontSize: 12, formatter: (v: number) => (v === 0 ? "now" : `${de(v, 0)} s`) },
           },
           yAxis: {
             type: "value", scale: true, name: unit, nameTextStyle: { color: "#68717b", fontSize: 11, align: "left" },

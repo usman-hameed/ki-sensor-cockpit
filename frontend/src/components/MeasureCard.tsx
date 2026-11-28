@@ -25,11 +25,11 @@ function Gauge({ sensor, needle }: { sensor: SensorInfo; needle: React.RefObject
   const pct = (v: number) => `${((v - min) / width) * 100}%`;
   const ext = sensor.tolerance_kind === "measuring_range" ? sensor.spec?.zones_um : undefined;
   const label = ext
-    ? `Messbereich ${pos(low, sensor, 0)} … ${pos(high, sensor, 0)} ${unitOf(sensor)} (erweitert ${pos(ext.ext_low, sensor, 1)} … ${pos(ext.ext_high, sensor, 1)})`
-    : `Toleranz ${pos(low, sensor)} … ${pos(high, sensor)} ${unitOf(sensor)}`;
+    ? `Measuring range ${pos(low, sensor, 0)} … ${pos(high, sensor, 0)} ${unitOf(sensor)} (extended ${pos(ext.ext_low, sensor, 1)} … ${pos(ext.ext_high, sensor, 1)})`
+    : `Tolerance ${pos(low, sensor)} … ${pos(high, sensor)} ${unitOf(sensor)}`;
   return (
     <div className="mgauge">
-      <div className="mgauge-top"><span>{label}</span><span>Rauschen {de(noise, 2)} {sensor.unit}</span></div>
+      <div className="mgauge-top"><span>{label}</span><span>Noise {de(noise, 2)} {sensor.unit}</span></div>
       <div className="mgauge-bar">
         {ext && <span className="mgauge-ext" style={{ left: 0, width: pct(low) }} />}
         {ext && <span className="mgauge-ext" style={{ left: pct(high), right: 0 }} />}
@@ -74,8 +74,8 @@ function ChannelTable({ chart, hidden, toggle }: {
   return (
     <table className="channels">
       <thead>
-        <tr><th /><th>Name</th><th>Farbe</th><th className="num">Aktueller Wert</th><th className="num">Min</th>
-          <th className="num">Max</th><th className="num">Peak-to-peak</th><th className="num">Rauschen</th><th>Zustand</th><th>Einheit</th></tr>
+        <tr><th /><th>Name</th><th>Color</th><th className="num">Current value</th><th className="num">Min</th>
+          <th className="num">Max</th><th className="num">Peak-to-peak</th><th className="num">Noise</th><th>State</th><th>Unit</th></tr>
       </thead>
       <tbody>
         {config?.sensors.map((sensor, i) => {
@@ -88,7 +88,7 @@ function ChannelTable({ chart, hidden, toggle }: {
           const tone = st?.state === "critical" || part?.state === "different" ? "bad" : st?.state === "warning" ? "warn" : "ok";
           return (
             <tr key={sensor.id}>
-              <td><input type="checkbox" checked={!hidden.has(sensor.id)} onChange={() => toggle(sensor.id)} aria-label={`${sensor.name} anzeigen`} /></td>
+              <td><input type="checkbox" checked={!hidden.has(sensor.id)} onChange={() => toggle(sensor.id)} aria-label={`Show ${sensor.name}`} /></td>
               <td>{sensor.name}</td>
               <td><span className="swatch" style={{ background: LINE_COLORS[i % LINE_COLORS.length] }} /></td>
               <td className="num">{pos(latest?.v, sensor, 4)}</td>
@@ -96,7 +96,7 @@ function ChannelTable({ chart, hidden, toggle }: {
               <td className="num">{pos(span?.max, sensor, 4)}</td>
               <td className="num">{span ? pos(span.max - span.min, sensor, 4) : "–"}</td>
               <td className="num">{de(st?.noise ?? null, 2)} {sensor.unit}</td>
-              <td><span className={`pill ${tone}`}>{state === "ok" ? "In Ordnung" : state}</span></td>
+              <td><span className={`pill ${tone}`}>{state === "ok" ? "OK" : state}</span></td>
               <td>{unitOf(sensor)}</td>
             </tr>
           );
@@ -119,8 +119,8 @@ function AssistantCharts() {
   return (
     <section className={`fold assistant ${open ? "is-open" : ""}`}>
       <button className="fold-head" onClick={() => setOpen(!open)}>
-        <span>Diagramme vom Assistenten</span>
-        <span className="fold-count">{count ? `${count} geöffnet` : "keine"}</span>
+        <span>Charts from the assistant</span>
+        <span className="fold-count">{count ? `${count} open` : "none"}</span>
         <i className="fold-arrow" />
       </button>
       {open && <div className="assistant-stage"><Stage /></div>}
@@ -152,7 +152,7 @@ export function MeasureCard({ sensor, chart, slot, windowS, setWindowS, paused, 
       last = now;
       const latest = series(sensor.id).latest();
       const v = latest && Number.isFinite(latest.v) ? latest.v : null;
-      if (valueRef.current) valueRef.current.textContent = v === null ? "kein Wert" : pos(v, sensor);
+      if (valueRef.current) valueRef.current.textContent = v === null ? "no reading" : pos(v, sensor);
       if (needleRef.current) {
         const { min, width } = gaugeAxis(sensor);
         const p = v === null ? 50 : Math.min(Math.max(((v - min) / width) * 100, 0), 100);
@@ -180,7 +180,7 @@ export function MeasureCard({ sensor, chart, slot, windowS, setWindowS, paused, 
     <section className="card measure">
       <div className="measure-top">
         <div className="measure-value">
-          <div className="label">{sensor.name} – Abstand</div>
+          <div className="label">{sensor.name} – distance</div>
           <div className="big"><span ref={valueRef}>…</span><small>{unitOf(sensor)}</small></div>
           <StatePills sensor={sensor} zone={zone} />
         </div>
@@ -192,10 +192,10 @@ export function MeasureCard({ sensor, chart, slot, windowS, setWindowS, paused, 
             <button key={s} className={windowS === s ? "is-on" : ""} onClick={() => setWindowS(s)}>{s} s</button>
           ))}
         </div>
-        <button className="btn" onClick={() => setPaused(!paused)}>{paused ? "▶ Weiter" : "❚❚ Anhalten"}</button>
-        <button className="btn" onClick={save} disabled={swapped} title={swapped ? "Das Live-Signal ist gerade rechts" : "Das Live-Signal als PNG speichern"}>Als Bild</button>
-        <button className="btn" onClick={onSwap} title="3D-Modell und Live-Signal tauschen">{swapped ? "⇄ Live-Signal groß" : "⇄ 3D-Modell groß"}</button>
-        <span className="toolbar-note">Live-Signal · rot hinterlegt = Meldung (anderes Teil, ungültig)</span>
+        <button className="btn" onClick={() => setPaused(!paused)}>{paused ? "▶ Resume" : "❚❚ Pause"}</button>
+        <button className="btn" onClick={save} disabled={swapped} title={swapped ? "The live signal is on the right now" : "Save the live signal as a PNG"}>Save image</button>
+        <button className="btn" onClick={onSwap} title="Swap the 3D model and the live signal">{swapped ? "⇄ Live signal large" : "⇄ 3D model large"}</button>
+        <span className="toolbar-note">Live signal · red background = alert (different part, invalid)</span>
       </div>
       <div className="measure-slot">{slot}</div>
       <ChannelTable chart={chart} hidden={hidden} toggle={toggle} />

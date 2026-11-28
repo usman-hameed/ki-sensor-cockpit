@@ -57,8 +57,8 @@ export default function App() {
         <div className="rightcol">
           <section className="card mini" onDoubleClick={swap}>
             <div className="mini-head">
-              <span>{swapped ? "Live-Signal" : "3D-Modell"}</span>
-              <button className="btn small" onClick={swap} title="In die Mitte holen (oder doppelklicken)">⤢ Groß</button>
+              <span>{swapped ? "Live signal" : "3D model"}</span>
+              <button className="btn small" onClick={swap} title="Bring to the middle (or double-click)">⤢ Large</button>
             </div>
             <div className="mini-body">{swapped ? live(true) : <TwinView />}</div>
           </section>

@@ -68,14 +68,14 @@ export function CameraPreview() {
       <div className={`camera-frame turn-${turn}`} ref={box}>
         {flash && <div className="camera-flash" key={cam.snapAt} />}
       </div>
-      <div className="camera-bar" onPointerDown={drag} title="Ziehen zum Verschieben">
+      <div className="camera-bar" onPointerDown={drag} title="Drag to move">
         <span className="camera-dot" />
-        <span className="camera-label">{cam.snapPart ? `Teil ${cam.snapPart} fotografiert` : "Live · ziehen zum Verschieben"}</span>
-        <button className="icon-only" title="Bild um 90° drehen (auch die Fotos)" onClick={() => setTurn(camera.rotate())}>⟳</button>
-        <button className="icon-only" title="Kamera aus" onClick={() => void controller.toggleCamera()}><Icon name="close" /></button>
+        <span className="camera-label">{cam.snapPart ? `Part ${cam.snapPart} photographed` : "Live · drag to move"}</span>
+        <button className="icon-only" title="Turn the picture 90° (the photos too)" onClick={() => setTurn(camera.rotate())}>⟳</button>
+        <button className="icon-only" title="Camera off" onClick={() => void controller.toggleCamera()}><Icon name="close" /></button>
       </div>
       <div className="camera-bar">
-        <select className="camera-select" value={camera.deviceId ?? ""} title="Welche Kamera"
+        <select className="camera-select" value={camera.deviceId ?? ""} title="Which camera"
           onChange={(e) => void controller.useCamera(e.target.value)}>
           {devices.map((d, i) => <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i + 1}`}</option>)}
         </select>
