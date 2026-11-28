@@ -8,7 +8,10 @@ import type {
   InsightStep,
   KnowledgeStatus,
   ManualDocument,
+  ManualAnswer,
+  ManualLibrary,
   ManualPassage,
+  ChatTurn,
   PartCountsData,
   PartsData,
   PartState,
@@ -117,10 +120,17 @@ export const api = {
     }),
   deleteManual: (name: string) => request<KnowledgeStatus>(`/api/knowledge/${encodeURIComponent(name)}`, { method: "DELETE" }),
   searchManual: (query: string) => post<{ hits: ManualPassage[] }>("/api/knowledge/search", { query, k: 5 }),
+  /** a written answer from the manuals, every value cited with section and page */
+  askManual: (question: string) => post<ManualAnswer>("/api/knowledge/ask", { question }),
+  /** the typed chat with the copilot when voice is off (same tools as voice) */
+  chat: (items: Record<string, unknown>[], previousResponseId: string | null) =>
+    post<ChatTurn>("/api/chat", { items, previous_response_id: previousResponseId }),
   manualUrl: (doc: string, page: number | null) =>
     `/api/knowledge/file/${encodeURIComponent(doc)}${page ? `#page=${page}` : ""}`,
   // the copilot's tools, called from the browser when the AI asks for them
-  searchManualTool: (query: string) => post<Record<string, unknown>>("/api/tools/search_manual", { query }),
+  searchManualTool: (query: string, product?: string) =>
+    post<Record<string, unknown>>("/api/tools/search_manual", { query, product: product || null }),
+  manualLibrary: () => request<ManualLibrary>("/api/knowledge/library"),
 };
 
 /** Fetches whatever a chart spec needs. */

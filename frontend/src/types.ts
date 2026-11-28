@@ -369,6 +369,10 @@ export interface ManualPassage {
   text: string;
   score?: number;
   via?: string;
+  /** the library file at its page, when the passage comes from the manual library */
+  url?: string;
+  /** the product the passage is about, e.g. "optoNCDT 1420" */
+  product?: string;
 }
 
 /** What a manual lookup found, shown on screen while the copilot speaks about it. */
@@ -376,4 +380,55 @@ export interface ManualHit {
   query: string;
   passages: ManualPassage[];
   message: string;
+}
+
+/** A written answer from the manuals: every value cited with section and page. */
+export interface ManualSource {
+  id: string;
+  doc: string;
+  doc_title: string;
+  section: string;
+  section_title: string;
+  page: number | null;
+  printed_page: number | null;
+  citation: string;
+  text: string;
+  footnotes: string[];
+  url: string;
+  product?: string;
+}
+
+/** Which product's manuals an answer comes from: named in the question, the connected sensor, or all. */
+export interface ManualScope {
+  source: string;
+  product: string | null;
+  documents?: number;
+}
+
+/** How far the manual library is indexed. */
+export interface ManualLibrary {
+  state: string;
+  documents: number;
+  passages: number;
+  embedded: number;
+  families: Record<string, number>;
+  active_product: string | null;
+  search: "hybrid" | "keyword";
+}
+
+export interface ManualAnswer {
+  question: string;
+  found: boolean;
+  answer: string;
+  mode: "generated" | "extractive" | "none";
+  search: "hybrid" | "keyword";
+  sources: ManualSource[];
+  scope?: ManualScope;
+}
+
+/** One turn of the typed chat: the model's text and the tools it wants run. */
+export interface ChatTurn {
+  id: string;
+  text: string;
+  calls: { call_id: string; name: string; arguments: string }[];
 }

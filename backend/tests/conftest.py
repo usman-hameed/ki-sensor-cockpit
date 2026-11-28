@@ -27,6 +27,8 @@ def settings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Settings:
     monkeypatch.setenv("OPENAI_API_KEY", "")
     monkeypatch.setenv("COCKPIT_TOKEN", "test-token")
     monkeypatch.setenv("KNOWLEDGE_DIR", str(tmp_path / "knowledge"))
+    # never the manual library of the machine that runs the tests (backend/.env may name one)
+    monkeypatch.setenv("MANUAL_LIBRARY_DIRS", "")
     return load_settings(TESTS / "sensors.yaml")
 
 

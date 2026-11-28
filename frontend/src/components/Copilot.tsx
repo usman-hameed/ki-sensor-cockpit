@@ -8,6 +8,7 @@ import { useStore, type FeedItem } from "../state/store";
 import type { VoiceActivity } from "../types";
 import { KIND_DE } from "./de";
 import { Icon } from "./Icon";
+import { Markdown } from "./Markdown";
 
 const ACTIVITY_RGB: Record<VoiceActivity, [number, number, number]> = {
   idle: [196, 22, 28],
@@ -101,7 +102,9 @@ function Item({ item, assistant }: { item: FeedItem; assistant: string }) {
       return (
         <li className={`feed-say who-${item.who}`}>
           <span className="feed-who">{item.who === "you" ? "Du" : item.who === "ai" ? assistant : "Cockpit"}</span>
-          <p>{item.text}{!item.final && <span className="caret" />}</p>
+          {item.who === "ai" && item.final
+            ? <div className="feed-md"><Markdown text={item.text} /></div>
+            : <p>{item.text}{!item.final && <span className="caret" />}</p>}
         </li>
       );
     case "report":

@@ -524,6 +524,23 @@ button { cursor: pointer; }
   .report-take { display: none; }
 }
 
+/* written answers: the Manuals sheet and the copilot feed (Markdown, citation chips, tables) */
+.man-answer { padding: 12px 14px; border-radius: 10px; background: var(--laser-soft); border-left: 3px solid var(--laser); font-size: 14px; line-height: 1.55; }
+.man-answer.is-missing { background: var(--sunk); border-left-color: var(--steel); }
+.man-answer p, .man-answer ul, .feed-md p, .feed-md ul { margin: 0 0 8px; }
+.man-answer > :last-child, .feed-md > :last-child { margin-bottom: 0; }
+.man-answer ul, .feed-md ul { padding-left: 18px; }
+.man-answer h3, .feed-md h3 { margin: 10px 0 4px; font-size: 14px; }
+.man-answer code, .feed-md code { font-size: 13px; background: rgba(21, 32, 43, 0.06); padding: 0 4px; border-radius: 4px; }
+.feed-md { font-size: 15px; line-height: 1.5; }
+.manual-chip { display: inline-block; margin: 0 2px; padding: 0 6px; border-radius: 6px; background: rgba(90, 63, 242, 0.14); color: var(--laser-deep); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.manual-table { overflow-x: auto; margin: 6px 0 8px; }
+.manual-table table { border-collapse: collapse; font-size: 13px; width: 100%; }
+.manual-table th, .manual-table td { border: 1px solid var(--hair-strong); padding: 4px 8px; text-align: left; vertical-align: top; }
+.manual-table th { background: rgba(255, 255, 255, 0.6); font-weight: 600; }
+
+.man-scope { margin: 0; font-size: 13px; color: var(--laser-deep); }
+
 /* the part check steps: done ones are ticked */
 .part-steps { padding-left: 20px; }
 .part-steps li.is-done { color: var(--go); }
@@ -741,3 +758,8 @@ table.channels { width: 100%; border-collapse: collapse; font-size: 13px; border
 .feed p { font-size: 12.5px; line-height: 1.45; margin: 4px 0 6px; }
 .feed-say p { font-size: 13px; }
 .mini .callout { transform: scale(0.85); transform-origin: top right; }
+/* the manuals sheet */
+.rec-body { padding: 16px 22px 22px; overflow-y: auto; max-height: calc(90vh - 70px); }
+.rec-step { margin-bottom: 18px; }
+.rec-step h3 { margin: 0 0 6px; font-size: 15px; }
+.rec-step p { margin: 6px 0; }

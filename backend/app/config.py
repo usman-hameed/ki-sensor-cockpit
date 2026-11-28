@@ -213,6 +213,15 @@ class Settings:
     embed_model: str = "text-embedding-3-small"
     knowledge_dir: Path = Path(__file__).resolve().parent.parent / "data" / "knowledge"
     openai_base_url: str = "https://api.openai.com/v1"
+    # written answers from the manuals (Manuals panel) and the typed chat when voice is off
+    # the manual library the answers come from: knowledge_dir plus these folders (all of a manufacturer's
+    # operating instructions, for example); vectors are cut to embed_dimensions to keep them small
+    manual_library: tuple[Path, ...] = ()
+    embed_dimensions: int = 512
+    answer_model: str = "gpt-5-mini"
+    answer_reasoning: str = "low"
+    chat_model: str = "gpt-5-mini"
+    chat_reasoning: str = "low"
 
     @property
     def voice_enabled(self) -> bool:
@@ -409,4 +418,10 @@ def load_settings(sensors_file: str | Path | None = None) -> Settings:
         embed_model=_env("OPENAI_EMBED_MODEL", "text-embedding-3-small"),
         knowledge_dir=Path(_env("KNOWLEDGE_DIR", str(Path(__file__).resolve().parent.parent / "data" / "knowledge"))),
         openai_base_url=_env("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+        manual_library=tuple(Path(p.strip()) for p in _env("MANUAL_LIBRARY_DIRS").split(";") if p.strip()),
+        embed_dimensions=_env_int("OPENAI_EMBED_DIMENSIONS", 512),
+        answer_model=_env("OPENAI_ANSWER_MODEL", "gpt-5-mini"),
+        answer_reasoning=_env("OPENAI_ANSWER_REASONING", "low").lower(),
+        chat_model=_env("OPENAI_CHAT_MODEL", "gpt-5-mini"),
+        chat_reasoning=_env("OPENAI_CHAT_REASONING", "low").lower(),
     )
